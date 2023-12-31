@@ -1,0 +1,91 @@
+<!-- index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
+    />
+
+    <title>Wikipedia Loop</title>
+  </head>
+  <body>
+    <div class="container text-center">
+      <h1 class="m-4">Wikipedia Loop</h1>
+      <label class="w-75">
+        Enter Wikipedia URL :
+        <input
+          type="text"
+          id="wikipediaUrl"
+          value="https://en.wikipedia.org/wiki/People"
+          class="w-50 border border-2 rounded p-2"
+        />
+      </label>
+
+      <div class="m-4">
+        <button
+          onclick="startLoop()"
+          class="btn bg-dark text-white p-2 rounded"
+        >
+          Start Loop
+        </button>
+      </div>
+
+      <br />
+      <br />
+      <div id="result"></div>
+    </div>
+
+    <script>
+      async function startLoop() {
+        const url = document.getElementById("wikipediaUrl").value;
+        const resultElement = document.getElementById("result");
+        resultElement.innerHTML = "Loading...";
+        try {
+          const response = await fetch(
+            "http://localhost:8081/api/getPhilosophyCount",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ url }),
+            }
+          );
+
+          const data = await response.json();
+          console.log("data", data);
+          if (data.success) {
+            resultElement.innerHTML = `
+            <h3>Number of requests : ${data.count}</h3>
+            <ul style="list-style-type:none" >
+              ${data.visitedPages
+                .map(
+                  (page) =>
+                    `<li class="border border-2 rounded m-1 p-2">${page}</li>`
+                )
+                .join("")}
+            </ul>
+          `;
+          } else {
+            resultElement.innerHTML = data.error;
+
+            console.error(data.error);
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    </script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>
